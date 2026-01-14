@@ -23,3 +23,10 @@ DATABASE_PATH=./shopping.db
 npm install
 npm start
 ```
+
+## Running Tests
+
+```
+npm run test
+npm run test:coverage
+```
