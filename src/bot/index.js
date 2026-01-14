@@ -1,6 +1,20 @@
 import TelegramBot from "node-telegram-bot-api";
 import { loadEnv } from "../utils/env.js";
+import { db } from "../db/index.js";
+import { UserService, ItemService } from "../services/index.js";
+import { TelegramBotCommandHandler } from "./handler.js";
 
-const { botToken } = loadEnv();
+export function initBot() {
+    const userService = new UserService(db);
+    const itemService = new ItemService(db);
 
-export const bot = new TelegramBot(botToken, { polling: true });
+    const { botToken } = loadEnv();
+    const bot = new TelegramBot(botToken, { polling: true });
+    const botComandHandler = new TelegramBotCommandHandler(userService, itemService, bot);
+
+    bot.onText(/\/start/, (msg) => botComandHandler.handleStartCommand(msg));
+    bot.onText(/\/stop/, (msg) => botComandHandler.handleStopCommand(msg));
+    bot.on("message", (msg) => botComandHandler.handleMessageCommand(msg));
+
+    return bot;
+}

@@ -7,7 +7,12 @@ export function loadEnv() {
     throw new Error("TELEGRAM_BOT_TOKEN is missing");
   }
 
+  if (!process.env.DATABASE_PATH) {
+    throw new Error("DATABASE_PATH is missing");
+  }
+
   return {
     botToken: process.env.TELEGRAM_BOT_TOKEN,
+    dbPath: process.env.DATABASE_PATH
   };
 }

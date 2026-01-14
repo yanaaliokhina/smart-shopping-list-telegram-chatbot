@@ -12,6 +12,7 @@
 ```
 BOT_TOKEN=your_telegram_bot_token
 NODE_ENV=development
+DATABASE_PATH=./shopping.db
 ```
 
 ⚠️ Never commit ```.env``` to version control

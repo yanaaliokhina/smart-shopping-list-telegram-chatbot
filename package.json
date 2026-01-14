@@ -25,7 +25,8 @@
   "homepage": "https://github.com/yanaaliokhina/smart-shopping-list-chatbot#readme",
   "dependencies": {
     "dotenv": "^17.2.3",
-    "node-telegram-bot-api": "^0.67.0"
+    "node-telegram-bot-api": "^0.67.0",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "eslint": "^9.39.2",
