@@ -1,21 +1,31 @@
 export class UserService {
-
     constructor(db) {
         this.db = db;
     }
 
     getOrCreateUser(telegramId) {
-        return new Promise((resolve) => {
-            this.db.get(
+        const db = this.db;
+
+        return new Promise((resolve, reject) => {
+            db.get(
                 "SELECT * FROM users WHERE telegram_id = ?",
                 [telegramId],
                 (err, row) => {
-                    if (row) resolve(row.id);
+                    if (err) {
+                        return reject(err);
+                    }
 
-                    this.db.run(
+                    if (row) {
+                        return resolve(row.id);
+                    }
+
+                    db.run(
                         "INSERT INTO users (telegram_id) VALUES (?)",
                         [telegramId],
-                        function () {
+                        function (err) {
+                            if (err) {
+                                return reject(err);
+                            }
                             resolve(this.lastID);
                         }
                     );
@@ -23,4 +33,4 @@ export class UserService {
             );
         });
     }
-};
+}

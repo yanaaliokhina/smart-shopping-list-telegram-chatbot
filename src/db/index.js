@@ -19,7 +19,7 @@ export function initDb() {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
                 name TEXT,
-                bought INTEGER DEFAULT 0,
+                bought BOOLEAN NOT NULL DEFAULT FALSE,
                 FOREIGN KEY(user_id) REFERENCES users(id)
             )
         `);

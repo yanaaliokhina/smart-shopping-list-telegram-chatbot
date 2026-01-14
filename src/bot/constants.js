@@ -23,3 +23,5 @@ export const TELEGRAM_BOT_ADD_ITEMS_MENU = {
     resize_keyboard: true
   }
 };
+
+export const MENU_ITEM_ERROR = "❌ Sorry, something went wrong.\nPlease try again in a moment.";
