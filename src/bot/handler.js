@@ -4,6 +4,7 @@ import {
     TELEGRAM_BOT_ADD_ITEMS_MENU_ITEM,
     TELEGRAM_BOT_ADD_ITEMS_MENU,
     TELEGRAM_BOT_CANCEL_ADD_ITEMS_MENU_ITEM,
+    TELEGRAM_BOT_CANCEL_MARK_ITEMS_BOUGHT_MENU_ITEM,
 } from "./constants.js";
 
 export class TelegramBotCommandHandler {
@@ -52,6 +53,10 @@ export class TelegramBotCommandHandler {
                 await this.handleCancelAddItemsCommand(msg);
                 break;
             }
+            case TELEGRAM_BOT_CANCEL_MARK_ITEMS_BOUGHT_MENU_ITEM: {
+                await this.handleMarkItemsBoughtCommand(msg);
+                break;
+            }
             default:
                 await this.handleTextTypingCommand(msg);
         }
@@ -68,7 +73,7 @@ export class TelegramBotCommandHandler {
 
         } else {
             const list = items
-                .map((i, idx) => `${idx + 1}. ${i.bought ? "✅" : "🟢"} ${i.name}`)
+                .map((i) => `${i.bought ? "✅" : "📋"} ${i.name}`)
                 .join("\n");
 
             this.bot.sendMessage(chatId, `📝 *Your Shopping List:*\n\n${list}`, {
@@ -113,7 +118,7 @@ export class TelegramBotCommandHandler {
 
     async handleCancelAddItemsCommand(msg) {
         const chatId = msg.chat.id;
-        
+
         const userId = await this.userService.getOrCreateUser(msg.from.id);
         this.userState.delete(userId);
 
@@ -121,6 +126,62 @@ export class TelegramBotCommandHandler {
             chatId,
             "✅ Add mode exited.",
             TELEGRAM_BOT_MAIN_MENU
+        );
+    }
+
+    async handleMarkItemsBoughtCommand(msg) {
+        const chatId = msg.chat.id;
+
+        const userId = await this.userService.getOrCreateUser(msg.from.id);
+        const items = await this.itemService.getUnboughtItems(userId);
+
+        if (items.length === 0) {
+            this.bot.sendMessage(chatId, "🎉 All items already bought!", TELEGRAM_BOT_MAIN_MENU);
+            return;
+        }
+
+        this.bot.sendMessage(chatId, "Select items:", {
+            reply_markup: {
+                inline_keyboard: items.map((i) => [
+                    { text: `🛒 ${i.name}`, callback_data: `buy_${i.id}` }
+                ])
+            }
+        });
+    }
+
+    async handleCallbackQuery(query) {
+        const { message, data } = query;
+        const [, itemId] = data.split("_");
+
+        if (query.data === "disabled") {
+            return this.bot.answerCallbackQuery(query.id, {
+                text: "Already marked as bought ✅",
+                show_alert: false
+            });
+        }
+
+        await this.itemService.markBought(itemId);
+
+        const originalKeyboard = message.reply_markup.inline_keyboard;
+        const updatedKeyboard = originalKeyboard.map(row =>
+            row.map(button => {
+                if (button.callback_data === `buy_${itemId}`) {
+                    return {
+                        text: "✅ Bought",
+                        callback_data: "disabled"
+                    };
+                }
+
+                return button;
+            })
+        );
+
+        this.bot.editMessageReplyMarkup(
+            { inline_keyboard: updatedKeyboard },
+            {
+                chat_id: message.chat.id,
+                message_id: message.message_id
+            }
         );
     }
 }

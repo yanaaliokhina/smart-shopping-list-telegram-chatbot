@@ -14,6 +14,16 @@ export class ItemService {
         });
     }
 
+    getUnboughtItems(userId) {
+        return new Promise((resolve) => {
+            this.db.all(
+                "SELECT * FROM items WHERE user_id = ? and bought = 0",
+                [userId],
+                (err, rows) => resolve(rows)
+            );
+        });
+    }
+
     addItem(userId, name) {
         return new Promise((resolve) => {
             this.db.run(
@@ -23,4 +33,14 @@ export class ItemService {
             );
         });
     };
+
+    markBought(itemId) {
+        return new Promise((resolve) => {
+            this.db.run(
+                "UPDATE items SET bought = 1 WHERE id = ?",
+                [itemId],
+                resolve
+            );
+        });
+    }
 }

@@ -15,6 +15,7 @@ export function initBot() {
     bot.onText(/\/start/, (msg) => botComandHandler.handleStartCommand(msg));
     bot.onText(/\/stop/, (msg) => botComandHandler.handleStopCommand(msg));
     bot.on("message", (msg) => botComandHandler.handleMessageCommand(msg));
+    bot.on("callback_query", (query) => botComandHandler.handleCallbackQuery(query));
 
     return bot;
 }
