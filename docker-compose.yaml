@@ -3,6 +3,29 @@ version: "3.9"
 services:
   memcached:
     image: memcached:1.6
-    container_name: memcached
+    container_name: telegram-memcached
     ports:
       - "11211:11211"
+
+  bot:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: telegram-shopping-bot
+
+    env_file:
+      - .env
+
+    environment:
+      NODE_ENV: production
+      DATABASE_PATH: /app/shopping.db
+      MEMCACHE_URL: memcached:11211
+      CACHE_TTL_SECONDS: 3600
+
+    depends_on:
+      - memcached
+
+    volumes:
+      - ./data:/app/data
+
+    command: npm run start
